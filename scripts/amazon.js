@@ -1,29 +1,5 @@
-const products = [{
-  image: 'images/products/athletic-cotton-socks-6-pairs.jpg',
-  name: 'Black and Gray Athletic Cotton Socks - 6 Pairs',
-  rating:{
-    stars : 4.5,
-    count: 87
-  },
-  priceInCents: 1090, 
-},{
-  image: 'images/products/intermediate-composite-basketball.jpg',
-  name: 'Intermediate Size Basketball',
-  rating:{
-    stars : 4,
-    count: 127
-  },
-  priceInCents: 2095
-},{
-  image: 'images/products/adults-plain-cotton-tshirt-2-pack-teal.jpg',
-  name: 'Adults Plain Cotton T-Shirt - 2 Pack',
-  rating:{
-    stars : 4.5,
-    count: 56
-  },
-  priceInCents: 799, 
-
-}];
+import {cart, updateQuantity} from "../data/cart.js";
+import {products} from "../data/products.js";
 let productsHTML = '';
 products.forEach((product)=>{
   productsHTML +=`
@@ -46,12 +22,12 @@ products.forEach((product)=>{
     </div>
 
     <div class="product-price">
-      $${(product.priceInCents / 100).toFixed(2)}
+      $${(product.priceCents / 100).toFixed(2)}
     </div>
 
     <div class="product-quantity-container">
-      <select>
-        <option selected value="1">1</option>
+      <select class="js-quantity-selector-${product.id}">
+        <option selected value="1" class="">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
         <option value="4">4</option>
@@ -66,15 +42,40 @@ products.forEach((product)=>{
 
     <div class="product-spacer"></div>
 
-    <div class="added-to-cart">
+    <div class="added-to-cart js-added-to-cart-${product.id}">
       <img src="images/icons/checkmark.png">
       Added
     </div>
 
-    <button class="add-to-cart-button button-primary">
+    <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${product.id}">
       Add to Cart
     </button>
   </div>
   `
 })
+
+function quantityOnTheCart(){
+  let cartQuantity = 0;
+  cart.forEach((item)=>{
+    cartQuantity += item.quantity;
+  })
+  document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
+}
+
+function addedPopupMessage(productId){
+  let addedMessage= document.querySelector(`.js-added-to-cart-${productId}`).classList;
+    addedMessage.add('addedMessage');
+    setTimeout(()=>{
+      addedMessage.remove('addedMessage');
+    }, 1200)
+}
+
 document.querySelector('.products-grid').innerHTML = productsHTML;
+document.querySelectorAll('.js-add-to-cart').forEach((button)=>{
+  button.addEventListener('click',()=>{
+    let productId = button.dataset.productId;
+    quantityOnTheCart();
+    addedPopupMessage(productId);
+    updateQuantity(productId);
+  })
+})
